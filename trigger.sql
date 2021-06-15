@@ -47,8 +47,6 @@ END;
 INSERT INTO EX2_ITEMPEDIDO VALUES (7, 3, 500, 50, 4);
 
 
-------------------------------------------------------------------------------------
-
 --- Atividade 3
 --- Crie um TRIGGER para retornar à quantidade em estoque de um ITEMPEDIDO que foi removido. Escrever a trigger correta abaixo:
 CREATE TRIGGER ex2_itempedido_removido AFTER DELETE ON EX2_ITEMPEDIDO FOR EACH ROW
@@ -57,11 +55,43 @@ BEGIN
 END;
 
 
+--- Atividade 4
 --- Crie um TRIGGER para NÃO deixar valores negativos serem INSERIDOS em ITEMPEDIDO, o valor mínimo é "0"; Escrever Trigger abaixo
-CREATE TRIGGER ex2_itempedido_positivo BEFORE BEFORE INSERT OR UPDATE ON EX2_ITEMPEDIDO FOR EACH ROW 
+CREATE TRIGGER ex2_itempedido_positivo BEFORE INSERT OR UPDATE ON EX2_ITEMPEDIDO FOR EACH ROW 
 BEGIN
     IF NEW.codpedido<0 OR NEW.numeroitem<0 OR NEW.valorunitario<0 OR NEW.quantidade<0 OR NEW.codproduto<0
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Valores devem serem positivos';
+    END IF;
+END;
+
+
+--- Atividade 5
+--- Verificar a Trigger acima. Coloque o SQL abaixo
+INSERT INTO EX2_ITEMPEDIDO VALUES (5, 1, 55.80, 2, 6);
+INSERT INTO EX2_ITEMPEDIDO VALUES (5, 1, 55.80, -9, 6);
+
+
+--- Ativide 6
+--- Crie um TRIGGER para gerar um log quando um produto atingir estoque <=3
+CREATE TRIGGER ex2_log_clientes AFTER INSERT OR UPDATE ON EX2_PRODUTO FOR EACH ROW
+BEGIN
+    IF quantidade<4 THEN
+        INSERT INTO EX2_LOG (comando, data, descricao)  VALUES ('UPDATE', DATETIME('now'), 'Quandidade de baixa para o produto: '||codproduto);
+    END IF;
+END;
+
+
+--- Atividade 7
+--- Verificar o Trigger acima. Adicionar o SQL abaixo
+UPDATE EX2_PRODUTO SET quantidade='2' WHERE codproduto='1';
+
+
+--- Atividade 8
+--- Crie um TRIGGER para criar uma requisição de REQUISICAO_COMPRA quando um produto atingir estoque <=3
+CREATE TRIGGER ex2_log_clientes AFTER INSERT OR UPDATE ON EX2_PRODUTO FOR EACH ROW
+BEGIN
+    IF quantidade<4 THEN
+        INSERT INTO EX2_REQUISICAO_COMPRA (codproduto, data, quantidade) VALUES (codproduto, DATETIME('now'), 100);
     END IF;
 END;
